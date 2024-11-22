@@ -34,11 +34,23 @@ public class FresherController extends HttpServlet{
         String graduationTime = req.getParameter("graduationTime") != null ? req.getParameter("graduationTime"):"";
         String graduationRank = req.getParameter("rank") != null ? req.getParameter("rank"):"";
         String universityName = req.getParameter("universityName") != null ? req.getParameter("universityName"):"";
+        String sortBy = req.getParameter("sortBy") != null ? req.getParameter("sortBy"):"c.lastName";
+        String direction = req.getParameter("direction") != null ? req.getParameter("direction"):"ASC";
+        
         List<University> universities = universityDAO.getUniversity("");
-        List<FresherCandidateDTO> freshers = fresherDAO.searchFresherCandidate(firstName, lastName, graduationTime, graduationRank, universityName, page);
+        List<FresherCandidateDTO> freshers = fresherDAO.searchFresherCandidate(firstName, lastName, graduationTime, graduationRank, universityName, page, sortBy, direction);
         
        req.setAttribute("universities", universities);
        req.setAttribute("freshers", freshers);
+       req.setAttribute("currentPage", page);
+       req.setAttribute("firstName", firstName);
+       req.setAttribute("lastName", lastName);
+       req.setAttribute("graduationTime", graduationTime);
+       req.setAttribute("graduationRank", graduationRank);
+       req.setAttribute("universityName", universityName);
+       req.setAttribute("sortBy", sortBy);
+       req.setAttribute("direction", direction);
+       req.setAttribute("totalPage", fresherDAO.totalPage);
         RequestDispatcher dispatcher = req.getRequestDispatcher("FresherCandidate.jsp");
         dispatcher.forward(req, resp);
     }

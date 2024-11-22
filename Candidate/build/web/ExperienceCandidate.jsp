@@ -13,7 +13,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href=" /styles/main.css">
     <style>
         .table-container {
             margin-left: 2rem;
@@ -71,14 +70,22 @@
 </head>
 <body>
     
-    <% 
-         String message = (String) session.getAttribute("message");
+    <%
+        String message = (String) session.getAttribute("message");
         if (message != null && !message.isEmpty()) {
-                 session.removeAttribute("message");
-        %>
-        <span style="color:green"><%= message %></span>
-        <%
-            }
+            session.removeAttribute("message");
+    %>
+        <div id="message" style="position:fixed; top:10%; left:30%; background:white; padding:20px; border:1px solid black; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); z-index:1000;">
+            <span style="color:green"><%= message %></span>
+            <button id="cancelButton" style="margin-left: 10px; padding: 5px; cursor: pointer;">Close</button>
+        </div>
+        <script>
+            document.getElementById("cancelButton").addEventListener("click", function() {
+                document.getElementById("message").style.display = "none";
+            });
+        </script>
+    <%
+        }
     %>
     
     <div class="col-sm-9 bg-white" id="menu">
@@ -108,6 +115,16 @@
                             }
                         %>
                     </select>
+            Sort By: <select name="sortBy">
+                <option value="c.lastName">Last Name</option>
+                <option value="s.name"> Skill </option>
+                <option value="c.birthDate">Birth</option>
+                <option value="c.address">Address</option>
+            </select>
+            Direction: <select name="direction">
+                <option value="ASC">ABC</option>
+                <option value="DESC">CBA</option>
+            </select>
             <button type="submit">Search</button>
         </form>
     </div>
@@ -190,14 +207,25 @@
     
     <div class="pagination">
         <% 
+            String firstName = (String) request.getAttribute("firstName");
+            String lastName = (String) request.getAttribute("lastName");
+            String skillName = (String) request.getAttribute("skillName");
+            String sortBy = (String) request.getAttribute("sortBy");
+            String direction = (String) request.getAttribute("direction");
             if (currentPage > 0) {
         %>
-            <a href="?page=<%= currentPage - 1 %>">Previous</a>
+            <a href="?firstName=<%= firstName %>&lastName=<%= lastName %>&skillName=<%= skillName %>&sortBy=<%= sortBy %>&direction=<%= direction %>&page=<%= currentPage - 1 %>">Previous</a>
         <%
             }
         %>
         <span>Page <%= currentPage + 1 %></span>
-        <a href="?page=<%= currentPage + 1 %>">Next</a>
+        <% int totalPage = (int) request.getAttribute("totalPage");
+        if(currentPage+1 < totalPage) {
+        %>
+        <a href="?firstName=<%= firstName %>&lastName=<%= lastName %>&skillName=<%= skillName %>&sortBy=<%= sortBy %>&direction=<%= direction %>&page=<%= currentPage + 1 %>">Next</a>
+        <%
+            }
+            %>
     </div>
 </body>
 </html>

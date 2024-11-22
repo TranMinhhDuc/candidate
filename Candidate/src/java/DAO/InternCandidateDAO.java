@@ -1,5 +1,6 @@
 package DAO;
 
+import static DAO.FresherCandidateDAO.totalPage;
 import DTO.InternCandidateDTO;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,29 +14,50 @@ public class InternCandidateDAO extends DAO{
         super();
     }
     
-    public List<InternCandidateDTO> searchInternCandidate(String firstName, String lastName, String major, String universityName, int page) {
+    public static int totalPage;
+    
+    public List<InternCandidateDTO> searchInternCandidate(String firstName, String lastName, String major, String universityName, int page, String sortBy, String direction) {
         List<InternCandidateDTO> candidates = new ArrayList<>();
         String sql = "SELECT ic.id, c.firstName, c.lastName, c.birthDate, c.address, c.phone, c.email, " +
-                     "ic.universityId, u.name AS universityName, m.majorName AS major, ic.semester " +
-                     "FROM InternCandidate ic " +
-                     "INNER JOIN Candidate c ON ic.candidateId = c.id " +
-                     "INNER JOIN University u ON ic.universityId = u.id " +
-                     "INNER JOIN Majors m ON ic.majorId = m.id " + // Liên kết với bảng Majors
-                     "WHERE c.firstName LIKE ? " +
-                     "AND c.lastName LIKE ? " +
-                     "AND m.majorName LIKE ? " + // Tìm kiếm bằng tên chuyên ngành
-                     "AND u.name LIKE ? " +
-                     "ORDER BY c.lastName ASC " +
-                     "LIMIT 10 OFFSET ?";
+                    "ic.universityId, u.name AS universityName, m.majorName AS major, ic.semester " +
+                    "FROM InternCandidate ic " +
+                    "INNER JOIN Candidate c ON ic.candidateId = c.id " +
+                    "INNER JOIN University u ON ic.universityId = u.id " +
+                    "INNER JOIN Majors m ON ic.majorId = m.id " +
+                    "WHERE c.firstName LIKE ? " +
+                    "AND c.lastName LIKE ? " +
+                    "AND m.majorName LIKE ? " + 
+                    "AND u.name LIKE ? " +
+                    "ORDER BY " + sortBy + " " + direction +
+                    " LIMIT 10 OFFSET ?";
 
+        String totalPageQuery = "SELECT CEIL(COUNT(*) / 10) AS totalPage " +
+                    "FROM InternCandidate ic " +
+                    "INNER JOIN Candidate c ON ic.candidateId = c.id " +
+                    "INNER JOIN University u ON ic.universityId = u.id " +
+                    "INNER JOIN Majors m ON ic.majorId = m.id " +
+                    "WHERE c.firstName LIKE ? " +
+                    "AND c.lastName LIKE ? " +
+                    "AND m.majorName LIKE ? " + 
+                    "AND u.name LIKE ? ";
+                
         try (PreparedStatement ps = con.prepareStatement(sql)) {
+            
+            PreparedStatement psTotalPage = con.prepareStatement(totalPageQuery);
+            
             ps.setString(1, "%" + firstName + "%");
             ps.setString(2, "%" + lastName + "%");
             ps.setString(3, "%" + major + "%");
             ps.setString(4, "%" + universityName + "%");
             ps.setInt(5, page * 10);
+            
+            psTotalPage.setString(1, "%" + firstName + "%");
+            psTotalPage.setString(2, "%" + lastName + "%");
+            psTotalPage.setString(3, "%" + major + "%");
+            psTotalPage.setString(4, "%" + universityName + "%");
 
             ResultSet resultSet = ps.executeQuery();
+            ResultSet rsTotalPage = psTotalPage.executeQuery();
 
             while (resultSet.next()) {
                 InternCandidateDTO candidate = new InternCandidateDTO();
@@ -51,6 +73,9 @@ public class InternCandidateDAO extends DAO{
                 candidate.setMajor(resultSet.getString("major"));
                 candidate.setSemester(resultSet.getString("semester"));
                 candidates.add(candidate);
+            }
+            if(rsTotalPage.next()) {
+                totalPage = rsTotalPage.getInt("totalPage");
             }
         } catch (SQLException e) {
             e.printStackTrace();

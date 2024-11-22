@@ -10,7 +10,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/styles/main.css">
     <style>
         .table-container {
             margin-left: 2rem;
@@ -53,14 +52,23 @@
     <title>Major</title>
 </head>
 <body>
-    <% 
-         String message = (String) session.getAttribute("message");
+    
+    <%
+        String message = (String) session.getAttribute("message");
         if (message != null && !message.isEmpty()) {
-                 session.removeAttribute("message");
-        %>
-        <span style="color:green"><%= message %></span>
-        <%
-            }
+            session.removeAttribute("message");
+    %>
+        <div id="message" style="position:fixed; top:10%; left:30%; background:white; padding:20px; border:1px solid black; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); z-index:1000;">
+            <span style="color:green"><%= message %></span>
+            <button id="cancelButton" style="margin-left: 10px; padding: 5px; cursor: pointer;">Close</button>
+        </div>
+        <script>
+            document.getElementById("cancelButton").addEventListener("click", function() {
+                document.getElementById("message").style.display = "none";
+            });
+        </script>
+    <%
+        }
     %>
     
     <div class="col-sm-9 bg-white" id="menu">

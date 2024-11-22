@@ -43,17 +43,28 @@ public class CandidateController extends HttpServlet{
             String birthDate = req.getParameter("birth") != null ? req.getParameter("birth"):"";
             String Address = req.getParameter("address") != null ? req.getParameter("address"):"";
             String candidateType = req.getParameter("candidateType") != null ? req.getParameter("candidateType"):"";
+            String sortBy = req.getParameter("sortBy") != null ? req.getParameter("sortBy"):"LastName";
+            String direction = req.getParameter("direction") != null ? req.getParameter("direction"):"ASC";
             
             List<Skill> skills = skillDAO.getSkills("");
             List<University> universities = universityDAO.getUniversity("");
             List<Major> majors = majorDAO.getMajors("");
 
-            List<Candidate> candidates =  candidateDAO.searchCandidate(page, firstName, lastName, birthDate, Address, candidateType);
+            List<Candidate> candidates =  candidateDAO.searchCandidate(page, firstName, lastName, birthDate, Address, candidateType, sortBy, direction);
+            
             req.setAttribute("candidates", candidates);
             req.setAttribute("currentPage", page);
             req.setAttribute("skills", skills);
             req.setAttribute("universities", universities);
             req.setAttribute("majors", majors);
+            req.setAttribute("firstName", firstName);
+            req.setAttribute("lastName", lastName);
+            req.setAttribute("birth", birthDate);
+            req.setAttribute("address", Address);
+            req.setAttribute("candidateType", candidateType);
+            req.setAttribute("totalPage", candidateDAO.totalPage);
+            req.setAttribute("sortBy", sortBy);
+            req.setAttribute("direction", direction);
             RequestDispatcher dispatcher = req.getRequestDispatcher("Candidate.jsp");
             dispatcher.forward(req, resp);
     }
@@ -84,6 +95,7 @@ public class CandidateController extends HttpServlet{
             candidate.setCandidateType(req.getParameter("candidateType"));
 
             message = candidateDAO.addCandidate(candidate)?"thêm thành công":"thêm không thành công";
+                System.out.println(message);
 
             resp.sendRedirect("candidate");
             break;

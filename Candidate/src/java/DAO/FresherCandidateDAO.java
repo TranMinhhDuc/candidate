@@ -12,9 +12,11 @@ public class FresherCandidateDAO extends DAO{
         super();
     }
     
+    public static int totalPage;
     private List<FresherCandidateDTO> candidates;
     
-    public List<FresherCandidateDTO> searchFresherCandidate(String firstName, String lastName, String graduationTime, String graduationRank, String universityName, int page) {
+    public List<FresherCandidateDTO> searchFresherCandidate(String firstName, String lastName, String graduationTime, String graduationRank, String universityName, int page, 
+            String sortBy, String direction) {
         
         String query = "SELECT fc.id AS fresherCandidateId, c.id AS candidateId, u.id AS universityId, c.firstName, c.lastName, " +
                         "fc.graduationTime, fc.graduationRank, u.name AS universityName, " +
@@ -27,13 +29,24 @@ public class FresherCandidateDAO extends DAO{
                         + "AND fc.graduationTime LIKE ? "
                         + "AND fc.graduationRank LIKE ? "
                         + "AND u.name LIKE ?" +
-                        "ORDER BY c.lastName ASC " +
-                        "LIMIT 10 OFFSET ?;";
+                        "ORDER BY " + sortBy + " " + direction +
+                        " LIMIT 10 OFFSET ?;";
+        
+        String totalPageQuery = "SELECT CEIL(COUNT(*) / 10) AS totalPage "
+                + "FROM freshercandidate fc " +
+                        "JOIN Candidate c ON fc.candidateId = c.id " +
+                        "JOIN university u ON fc.universityId = u.id " +
+                        "WHERE c.firstName LIKE ? "
+                        + "AND c.lastName LIKE ? "
+                        + "AND fc.graduationTime LIKE ? "
+                        + "AND fc.graduationRank LIKE ? "
+                        + "AND u.name LIKE ?";
         
         candidates = new ArrayList<>();
         
         try {
             PreparedStatement ps = con.prepareStatement(query);
+            PreparedStatement psTotalPage = con.prepareStatement(totalPageQuery);
             
             ps.setString(1, "%" + firstName + "%");
             ps.setString(2, "%" + lastName + "%");
@@ -42,7 +55,14 @@ public class FresherCandidateDAO extends DAO{
             ps.setString(5, "%" + universityName + "%");
             ps.setInt(6, page * 10);
             
+            psTotalPage.setString(1, "%" + firstName + "%");
+            psTotalPage.setString(2, "%" + lastName + "%");
+            psTotalPage.setString(3, "%" + graduationTime + "%");
+            psTotalPage.setString(4, "%" + graduationRank + "%");
+            psTotalPage.setString(5, "%" + universityName + "%");
+            
             ResultSet rs = ps.executeQuery();
+            ResultSet rsTotalPage = psTotalPage.executeQuery();
             
             while(rs.next()) {
                 
@@ -62,8 +82,14 @@ public class FresherCandidateDAO extends DAO{
                 
                 candidates.add(candidate);
             }
+            
+            if(rsTotalPage.next()) {
+                totalPage = rsTotalPage.getInt("totalPage");
+            }
         } catch (Exception e) {
         }
+        
+        System.out.println(totalPage);
         return candidates;
     }
     

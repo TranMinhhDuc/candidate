@@ -32,14 +32,22 @@ public class ExperienceCandidateController extends HttpServlet {
         String firstName = req.getParameter("firstName") != null ? req.getParameter("firstName"):"";
         String lastName = req.getParameter("lastName") != null ? req.getParameter("lastName"):"";
         String skillName = req.getParameter("skillName") != null ? req.getParameter("skillName"):"";
+        String sortBy = req.getParameter("sortBy") != null ? req.getParameter("sortBy"):"c.lastName";
+        String direction = req.getParameter("direction") != null ? req.getParameter("direction"):"ASC";
 
         List<Skill> skills = skillDAO.getSkills("");
         req.setAttribute("skills", skills);
 
-        List<ExperienceCandidateDTO> experiences = exCandidateDAO.searchExperienceCandidate(page, firstName, lastName, skillName);
+        List<ExperienceCandidateDTO> experiences = exCandidateDAO.searchExperienceCandidate(page, firstName, lastName, skillName, sortBy, direction);
 
         req.setAttribute("currentPage", page);
         req.setAttribute("candidates", experiences);
+        req.setAttribute("firstName", firstName);
+        req.setAttribute("lastName", lastName);
+        req.setAttribute("skillName", skillName);
+        req.setAttribute("sortBy", sortBy);
+        req.setAttribute("direction", direction);
+        req.setAttribute("totalPage", exCandidateDAO.totalPage);
         RequestDispatcher dispatcher = req.getRequestDispatcher("ExperienceCandidate.jsp");
         dispatcher.forward(req, resp);
     }

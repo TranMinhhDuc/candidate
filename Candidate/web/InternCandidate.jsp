@@ -11,7 +11,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/styles/main.css">
     <style>
         .table-container {
             margin-left: 2rem;
@@ -70,14 +69,22 @@
 </head>
 <body>
     
-    <% 
-         String message = (String) session.getAttribute("message");
+    <%
+        String message = (String) session.getAttribute("message");
         if (message != null && !message.isEmpty()) {
-                 session.removeAttribute("message");
-        %>
-        <span style="color:green"><%= message %></span>
-        <%
-            }
+            session.removeAttribute("message");
+    %>
+        <div id="message" style="position:fixed; top:10%; left:30%; background:white; padding:20px; border:1px solid black; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); z-index:1000;">
+            <span style="color:green"><%= message %></span>
+            <button id="cancelButton" style="margin-left: 10px; padding: 5px; cursor: pointer;">Close</button>
+        </div>
+        <script>
+            document.getElementById("cancelButton").addEventListener("click", function() {
+                document.getElementById("message").style.display = "none";
+            });
+        </script>
+    <%
+        }
     %>
     
     <div class="col-sm-9 bg-white" id="menu">
@@ -99,7 +106,6 @@
             First Name: <input type="text" name="firstName">
             Last Name: <input type="text" name="lastName">
             Major: <input type="text" name="major">
-            Semester: <input type="number" name="semester">
             University: 
             <select name="universityName">
                 <option></option>
@@ -107,6 +113,19 @@
                 for(University university : universities) { %> 
                     <option value="<%= university.getUniversityName() %>"><%= university.getUniversityName() %></option>
                 <% } %>
+            </select>
+            
+            Sort By: <select name="sortBy">
+                <option value="c.lastName">Last Name</option>
+                <option value="m.majorName"> Major </option>
+                <option value="ic.semester"> Semester </option>
+                <option value="u.name">University</option>
+                <option value="c.birthDate">Birth</option>
+                <option value="c.address">Address</option>
+            </select>
+            Direction: <select name="direction">
+                <option value="ASC">ABC</option>
+                <option value="DESC">CBA</option>
             </select>
             <button type="submit">Search</button>
         </form>
@@ -130,11 +149,13 @@
                 </tr>
             </thead>
             <% 
+                int currentPage = (int) request.getAttribute("currentPage");
                 List<InternCandidateDTO> interns = (List<InternCandidateDTO>) request.getAttribute("interns");
+                int cnt = currentPage * 10 + 1;
                 for(InternCandidateDTO intern : interns) {
             %>
             <tr>
-                <td>#</td>
+                <td><%= cnt++ %></td>
                 <td><%= intern.getFirstName() %></td>
                 <td><%= intern.getLastName() %></td>
                 <td><%= intern.getMajor() %></td>
@@ -176,6 +197,30 @@
                 <button type="button" onclick="closeUpdate()">Cancel</button>
             </form>
         </div>
+    </div>
+                    
+    <div class="pagination">
+        <% 
+            String firstName = (String) request.getAttribute("firstName");
+            String lastName = (String) request.getAttribute("lastName");
+            String Major = (String) request.getAttribute("major");
+            String universityName = (String) request.getAttribute("universityName");
+            String sortBy = (String) request.getAttribute("sortBy");
+            String direction = (String) request.getAttribute("direction");
+            if (currentPage > 0) {
+        %>
+        <a href="?firstName=<%= firstName %>&lastName=<%= lastName %>&major=<%= Major%>&universityName=<%= universityName %>&sortBy=<%= sortBy %>&direction=<%= direction %>&page=<%= currentPage - 1 %>">Previous</a>
+        <%
+            }
+        %>
+        <span>Page <%= currentPage + 1 %></span>
+        <% int totalPage = (int) request.getAttribute("totalPage");
+        if(currentPage+1 < totalPage) {
+        %>
+        <a href="?firstName=<%= firstName %>&lastName=<%= lastName %>&major=<%= Major%>&universityName=<%= universityName %>&sortBy=<%= sortBy %>&direction=<%= direction %>&page=<%= currentPage - 1 %>">Next</a>
+        <%
+            }
+            %>
     </div>
 </body>
 </html>

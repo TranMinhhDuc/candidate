@@ -11,8 +11,10 @@ public class ExperienceCandidateDAO extends DAO {
     public ExperienceCandidateDAO() {
         super();
     }
+    
+    public static int totalPage;
 
-    public List<ExperienceCandidateDTO> searchExperienceCandidate(int page, String firstName, String lastName, String skillName) {
+    public List<ExperienceCandidateDTO> searchExperienceCandidate(int page, String firstName, String lastName, String skillName, String sortBy, String direction) {
         List<ExperienceCandidateDTO> candidates = new ArrayList<>();
         String sql = "SELECT " +
                      "cs.id AS candidateSkillId, " +
@@ -29,14 +31,27 @@ public class ExperienceCandidateDAO extends DAO {
                      "JOIN Candidate c ON cs.candidateId = c.id " +
                      "JOIN Skill s ON cs.skillId = s.id "
                      + "WHERE c.firstName LIKE ? AND c.lastName LIKE ? AND s.name LIKE ?"
-                     + "ORDER BY c.lastName ASC "
-                     + "LIMIT 10 OFFSET ?";
+                     + "ORDER BY " + sortBy + " " + direction 
+                     + " LIMIT 10 OFFSET ?";
+        
+        String totalPageQuery = "SELECT CEIL(COUNT(*) / 10) AS totalPage "
+                + "FROM CandidateSkill cs " +
+                "JOIN Candidate c ON cs.candidateId = c.id " +
+                "JOIN Skill s ON cs.skillId = s.id "
+                + "WHERE c.firstName LIKE ? AND c.lastName LIKE ? AND s.name LIKE ?";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
-        	ps.setString(1, "%" + firstName + "%");
+            PreparedStatement psTotalPage = con.prepareStatement(totalPageQuery);
+            
+            ps.setString(1, "%" + firstName + "%");
             ps.setString(2, "%" + lastName + "%");
             ps.setString(3, "%" + skillName + "%");
             ps.setInt(4, page*10);
             
+            psTotalPage.setString(1, "%" + firstName + "%");
+            psTotalPage.setString(2, "%" + lastName + "%");
+            psTotalPage.setString(3, "%" + skillName + "%");
+            
+            ResultSet rsTotalPage = psTotalPage.executeQuery();
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 ExperienceCandidateDTO candidate = new ExperienceCandidateDTO();
@@ -52,9 +67,14 @@ public class ExperienceCandidateDAO extends DAO {
                 candidate.setEmail(rs.getString("email"));
                 candidates.add(candidate);
             }
+            
+            if(rsTotalPage.next()){
+                totalPage = rsTotalPage.getInt("totalPage");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        System.out.println(totalPage);
         return candidates;
     }
     

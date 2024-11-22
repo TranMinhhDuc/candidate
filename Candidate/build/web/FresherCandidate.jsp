@@ -15,7 +15,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href=" /styles/main.css">
     <style>
         .table-container {
             margin-left: 2rem;
@@ -74,14 +73,22 @@
 </head>
 <body>
 	
-    <% 
-         String message = (String) session.getAttribute("message");
+    <%
+        String message = (String) session.getAttribute("message");
         if (message != null && !message.isEmpty()) {
-                 session.removeAttribute("message");
-        %>
-        <span style="color:green"><%= message %></span>
-        <%
-            }
+            session.removeAttribute("message");
+    %>
+        <div id="message" style="position:fixed; top:10%; left:30%; background:white; padding:20px; border:1px solid black; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); z-index:1000;">
+            <span style="color:green"><%= message %></span>
+            <button id="cancelButton" style="margin-left: 10px; padding: 5px; cursor: pointer;">Close</button>
+        </div>
+        <script>
+            document.getElementById("cancelButton").addEventListener("click", function() {
+                document.getElementById("message").style.display = "none";
+            });
+        </script>
+    <%
+        }
     %>
     
     <div class="col-sm-9 bg-white" id="menu">
@@ -101,7 +108,7 @@
         <form method="get">
             First Name: <input type="text" name="firstName">
             Last Name: <input type="text" name="lastName">
-            Graduation Time: <input type="number" name="graduationTime">
+            Graduation Time: <input type="number" name="graduationTime" min="2000" max="2050">
             Rank: <select name="rank">
                 <option></option>
                 <option value="Giỏi">Giỏi</option>
@@ -119,6 +126,18 @@
                     }
                 %>
                     </select>
+            Sort By: <select name="sortBy">
+                <option value="c.lastName">Last Name</option>
+                <option value="fc.graduationTime"> Graduation Time </option>
+                <option value="fc.graduationRank"> Rank </option>
+                <option value="u.name">University</option>
+                <option value="c.birthDate">Birth</option>
+                <option value="c.address">Address</option>
+            </select>
+            Direction: <select name="direction">
+                <option value="ASC">ABC</option>
+                <option value="DESC">CBA</option>
+            </select>
             <button type="submit">Search</button>
         </form>
     </div>
@@ -142,11 +161,13 @@
             </thead>
             
             <% 
+                int currentPage = (int) request.getAttribute("currentPage");
                 List<FresherCandidateDTO> freshers = (List<FresherCandidateDTO>) request.getAttribute("freshers");
+                int cnt = currentPage * 10 + 1;
                 for(FresherCandidateDTO fresher : freshers){
                     %>
                     <tr>
-                    <td>#</td>
+                    <td><%= cnt++ %></td>
                     <td><%= fresher.getFirstName() %></td>
                     <td><%= fresher.getLastName() %></td>
                     <td><%= fresher.getGrauduationtime() %></td>
@@ -181,7 +202,7 @@
                     Last Name: <span id="updateLastName"></span>
                 </div>
                 <div>
-                    Graduation Time: <input type="text" id="updateGraduationTime" name="graduationTime">
+                    Graduation Time: <input type="number" id="updateGraduationTime" name="graduationTime" min="2000" max="2050">
                 </div>
                 <div>
                     Rank: <select name="rank">
@@ -202,6 +223,30 @@
                 <button type="button"" onclick="closeUpdate()">Cancel</button>
             </form>
         </div>
-
+                    
+        <div class="pagination">
+        <% 
+            String firstName = (String) request.getAttribute("firstName");
+            String lastName = (String) request.getAttribute("lastName");
+            String graduationTime = (String) request.getAttribute("graduationTime");
+            String graduationRank = (String) request.getAttribute("graduationRank");
+            String universityName = (String) request.getAttribute("universityName");
+            String sortBy = (String) request.getAttribute("sortBy");
+            String direction = (String) request.getAttribute("direction");
+            if (currentPage > 0) {
+        %>
+        <a href="?firstName=<%= firstName %>&lastName=<%= lastName %>&graduationTime=<%= graduationTime %>&rank=<%= graduationRank %>&universityName=<%= universityName %>&sortBy=<%= sortBy %>&direction=<%= direction %>&page=<%= currentPage - 1 %>">Previous</a>
+        <%
+            }
+        %>
+        <span>Page <%= currentPage + 1 %></span>
+        <% int totalPage = (int) request.getAttribute("totalPage");
+        if(currentPage+1 < totalPage) {
+        %>
+        <a href="?firstName=<%= firstName %>&lastName=<%= lastName %>&graduationTime=<%= graduationTime %>&rank=<%= graduationRank %>&universityName=<%= universityName %>&sortBy=<%= sortBy %>&direction=<%= direction %>&page=<%= currentPage - 1 %>">Next</a>
+        <%
+            }
+            %>
+        </div>
 </body>
 </html>

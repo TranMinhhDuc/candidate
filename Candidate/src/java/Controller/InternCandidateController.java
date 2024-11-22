@@ -33,12 +33,22 @@ public class InternCandidateController extends HttpServlet {
         String lastName = req.getParameter("lastName") != null ? req.getParameter("lastName") : "";
         String major = req.getParameter("major") != null ? req.getParameter("major") : "";
         String universityName = req.getParameter("universityName") != null ? req.getParameter("universityName") : "";
+        String sortBy = req.getParameter("sortBy") != null ? req.getParameter("sortBy"):"c.lastName";
+        String direction = req.getParameter("direction") != null ? req.getParameter("direction"):"ASC";
 
         List<University> universities = universityDAO.getUniversity("");
-        List<InternCandidateDTO> interns = internDAO.searchInternCandidate(firstName, lastName, major, universityName, page);
+        List<InternCandidateDTO> interns = internDAO.searchInternCandidate(firstName, lastName, major, universityName, page, sortBy, direction);
 
         req.setAttribute("universities", universities);
         req.setAttribute("interns", interns);
+        req.setAttribute("currentPage", page);
+       req.setAttribute("firstName", firstName);
+       req.setAttribute("lastName", lastName);
+       req.setAttribute("major", major);
+       req.setAttribute("universityName", universityName);
+       req.setAttribute("sortBy", sortBy);
+       req.setAttribute("direction", direction);
+       req.setAttribute("totalPage", internDAO.totalPage);
         RequestDispatcher dispatcher = req.getRequestDispatcher("InternCandidate.jsp");
         dispatcher.forward(req, resp);
     }

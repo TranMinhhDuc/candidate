@@ -14,11 +14,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href=" /styles/main.css">
     <style>
         .table-container {
-            margin-left: 2rem;  /* Lề trái */
-            margin-right: 2rem; /* Lề phải */
+            margin-left: 2rem;
+            margin-right: 2rem; 
         }
         .pagination {
             justify-content: center;
@@ -33,11 +32,11 @@
 		#menu ul {
 		    display: flex;
 		    justify-content: center;
-		    align-items: center; /* Đảm bảo căn giữa theo chiều dọc nếu cần */
+		    align-items: center;
 		    gap: 50px;
 		    background-color: white;
-		    padding: 10px 0; /* Thêm khoảng cách trên dưới */
-		    margin: 0; /* Loại bỏ lề mặc định */
+		    padding: 10px 0; 
+		    margin: 0;
 		}
 		
 		#menu ul li {
@@ -115,15 +114,24 @@
 </head>
 <body>
     
-    <% 
-         String message = (String) session.getAttribute("message");
+    <%
+        String message = (String) session.getAttribute("message");
         if (message != null && !message.isEmpty()) {
-                 session.removeAttribute("message");
-        %>
-        <span style="color:green"><%= message %></span>
-        <%
-            }
+            session.removeAttribute("message");
     %>
+        <div id="message" style="position:fixed; top:10%; left:30%; background:white; padding:20px; border:1px solid black; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); z-index:1000;">
+            <span style="color:green"><%= message %></span>
+            <button id="cancelButton" style="margin-left: 10px; padding: 5px; cursor: pointer;">Close</button>
+        </div>
+        <script>
+            document.getElementById("cancelButton").addEventListener("click", function() {
+                document.getElementById("message").style.display = "none";
+            });
+        </script>
+    <%
+        }
+    %>
+
     <div class="col-sm-9 bg-white" id="menu">
         <ul>
             <li><a href="/candidate/candidate">Candidate</a></li>
@@ -145,6 +153,16 @@
             Birth: <input type="number" name="birth" min="1980" max="2010">
             Address: <input type="text" name="address">
             Candidate Type: <input type="number" name="candidateType" min="0" max="2">
+            Sort By: <select name="sortBy">
+                <option value="LastName">Last Name</option>
+                <option value="BirthDate">Birth</option>
+                <option value="CandidateType">Candidate Type</option>
+                <option value="address"> Address</option>
+            </select>
+            Direction: <select name="direction">
+                <option value="ASC">ABC</option>
+                <option value="DESC">CBA</option>
+            </select>
             <button type="submit">Search</button>
         </form>
     </div>
@@ -152,15 +170,15 @@
         <h2 class="text-center">Candiate</h2>
         <table id="device-usage-table" class="table text-center">
               <tr>
-              		<th>STT</th>
-                  <th>First Name</th>
-                  <th>Last Name</th>
-                  <th>Birth</th>
-                  <th>Address</th>
-                  <th>Phone</th>
-                  <th>Email</th>
-                  <th>Candidate Type</th>
-                  <th>Action</th>
+                <th>STT</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Birth</th>
+                <th>Address</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Candidate Type</th>
+                <th>Action</th>
               </tr>
               
               <% 
@@ -169,46 +187,46 @@
 	              int stt = currentPage*10+1;
               		for(Candidate candidate:candidates){
 	            	  %>
-	            	  	<tr>
-	            	  		<td><%= stt++ %></td>
-	            	  		<td><%= candidate.getFirstName() %></td>
-	            	  		<td><%= candidate.getLastName() %></td>
-	            	  		<td><%= candidate.getBirthDate() %></td>
-	            	  		<td><%= candidate.getAddress() %></td>
-	            	  		<td><%= candidate.getPhone() %></td>
-	            	  		<td><%= candidate.getEmail() %></td>
-	            	  		<td><%= candidate.getCandidateType() %></td>
-	            	  		<td>
-	                            <form method="post" style="display:inline;">
-	                                <input type="hidden" name="action" value="delete">
-	                                <input type="hidden" name="candidateid" value="<%= candidate.getId()%>">
-	                                <button type="submit" onclick="return confirm('xóa ứng viên này?');">Delete</button>
-	                            </form>
-	                                <button onclick="openUpdateCandidate(
-								        '<%= candidate.getId() %>',
-								        '<%= candidate.getFirstName() %>',
-								        '<%= candidate.getLastName() %>',
-								        '<%= candidate.getBirthDate() %>',
-								        '<%= candidate.getAddress() %>',
-								        '<%= candidate.getPhone() %>',
-								        '<%= candidate.getEmail() %>',
-								        '<%= candidate.getCandidateType() %>'
-								    )">Update</button>
-                                                 
-                                        <% if (candidate.getCandidateType().equals("0")) {
+                            <tr>
+                                <td><%= stt++ %></td>
+                                <td><%= candidate.getFirstName() %></td>
+                                <td><%= candidate.getLastName() %></td>
+                                <td><%= candidate.getBirthDate() %></td>
+                                <td><%= candidate.getAddress() %></td>
+                                <td><%= candidate.getPhone() %></td>
+                                <td><%= candidate.getEmail() %></td>
+                                <td><%= candidate.getCandidateType() %></td>
+                                <td>
+                                <form method="post" style="display:inline;">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="candidateid" value="<%= candidate.getId()%>">
+                                    <button type="submit" onclick="return confirm('xóa ứng viên này?');">Delete</button>
+                                </form>
+                                    <button onclick="openUpdateCandidate(
+                                                                    '<%= candidate.getId() %>',
+                                                                    '<%= candidate.getFirstName() %>',
+                                                                    '<%= candidate.getLastName() %>',
+                                                                    '<%= candidate.getBirthDate() %>',
+                                                                    '<%= candidate.getAddress() %>',
+                                                                    '<%= candidate.getPhone() %>',
+                                                                    '<%= candidate.getEmail() %>',
+                                                                    '<%= candidate.getCandidateType() %>'
+                                                                )">Update</button>
+
+                                    <% if (candidate.getCandidateType().equals("0")) {
+                                        %>
+                                        <button onclick="openAddSkill('<%= candidate.getId()%>', '<%= candidate.getFirstName()%>', '<%= candidate.getLastName()%>')">Add Skill</button>
+                                        <%
+                                        }else if(candidate.getCandidateType().equals("1")){
                                             %>
-                                            <button onclick="openAddSkill('<%= candidate.getId()%>', '<%= candidate.getFirstName()%>', '<%= candidate.getLastName()%>')">Add Skill</button>
+                                            <button onclick="openAddFresher('<%= candidate.getId() %>')">Add University</button>
                                             <%
-                                            }else if(candidate.getCandidateType().equals("1")){
-                                                %>
-                                                <button onclick="openAddFresher('<%= candidate.getId() %>')">Add University</button>
-                                                <%
-                                            }else {
-                                                %>
-                                                <button onclick="openAddIntern('<%= candidate.getId() %>')">Add University</button>
-                                                <%
-                                                }
-                                        %>       
+                                        }else {
+                                            %>
+                                            <button onclick="openAddIntern('<%= candidate.getId() %>')">Add University</button>
+                                            <%
+                                            }
+                                    %>       
 	                        </td>
 	            	  	</tr>
 	            	  <%
@@ -328,14 +346,26 @@
     
     <div class="pagination">
         <% 
+            String firstName = (String) request.getAttribute("firstName");
+            String lastName = (String) request.getAttribute("lastName");
+            String birth = (String) request.getAttribute("birth");
+            String address = (String) request.getAttribute("address");
+            String candidateType = (String) request.getAttribute("candidateType");
+            String sortBy = (String) request.getAttribute("sortBy");
+            String direction = (String) request.getAttribute("direction");
             if (currentPage > 0) {
         %>
-            <a href="?page=<%= currentPage - 1 %>">Previous</a>
+        <a href="?firstName=<%= firstName %>&lastName=<%= lastName %>&birth=<%= birth %>&address=<%= address %>&candidateType=<%= candidateType %>&sortBy=<%= sortBy %>&direction=<%= direction %>&page=<%= currentPage - 1 %>">Previous</a>
         <%
             }
         %>
         <span>Page <%= currentPage + 1 %></span>
-        <a href="?page=<%= currentPage + 1 %>">Next</a>
+        <% int totalPage = (int) request.getAttribute("totalPage");
+        if (currentPage + 1 < totalPage){
+        %>
+                <a href="?firstName=<%= firstName %>&lastName=<%= lastName %>&birth=<%= birth %>&address=<%= address %>&candidateType=<%= candidateType %>&sortBy=<%= sortBy %>&direction=<%= direction %>&page=<%= currentPage + 1 %>">Next</a>
+                <%
+            } %>
     </div>
 </body>
 </html>
